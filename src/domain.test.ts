@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { finishPrint, remainingWeight, startPrint, unitCost } from './domain'
+import { defaultActualWeightG, finishPrint, remainingWeight, startPrint, unitCost } from './domain'
 import type { AppData, Material } from './types'
 
 const material = (id: string, price = 100, status: Material['status'] = 'MOUNTED'): Material => ({
@@ -9,6 +9,12 @@ const material = (id: string, price = 100, status: Material['status'] = 'MOUNTED
 const emptyData = (materials: Material[] = [material('a')]): AppData => ({ materials, printJobs: [], usages: [] })
 
 describe('filament usage domain', () => {
+  it('provides finish defaults for each final status', () => {
+    expect(defaultActualWeightG('COMPLETED', 82)).toBe(82)
+    expect(defaultActualWeightG('CANCELLED', 82)).toBe(0)
+    expect(defaultActualWeightG('FAILED', 82)).toBeNull()
+  })
+
   it('calculates single-material remaining weight and cost from actual usage', () => {
     const started = startPrint(emptyData(), 'single color', '', [{ materialId: 'a', estimatedWeightG: 100 }])
     const finished = finishPrint(started, started.printJobs[0].id, 'COMPLETED', [{ usageId: started.usages[0].id, actualWeightG: 110 }])

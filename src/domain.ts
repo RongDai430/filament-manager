@@ -29,6 +29,12 @@ export const unitCost = (material: Material) => material.price / material.initia
 export const usageCost = (usage: MaterialUsage, material: Material) =>
   usage.actualWeightG === null ? 0 : usage.actualWeightG * unitCost(material)
 
+export const defaultActualWeightG = (status: Exclude<PrintJobStatus, 'PRINTING'>, estimatedWeightG: number): number | null => {
+  if (status === 'COMPLETED') return estimatedWeightG
+  if (status === 'CANCELLED') return 0
+  return null
+}
+
 export const jobTotals = (jobId: string, usages: MaterialUsage[], materials: Material[]): JobTotals => {
   const jobUsages = usages.filter((usage) => usage.printJobId === jobId)
   const estimated = round2(jobUsages.reduce((sum, usage) => sum + usage.estimatedWeightG, 0))
