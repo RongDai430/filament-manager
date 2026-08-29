@@ -55,6 +55,7 @@ export const validateMaterial = (input: MaterialInput) => {
   if (!input.color.trim()) errors.color = '请输入颜色'
   if (!input.currentLocation.trim()) errors.currentLocation = '请输入当前位置'
   if (!Number.isFinite(input.initialWeightG) || input.initialWeightG <= 0) errors.initialWeightG = '重量必须大于 0'
+  else if (input.initialWeightG > 10000) errors.initialWeightG = '初始耗材净重不能超过 10000g（10kg）'
   if (!Number.isFinite(input.price) || input.price < 0) errors.price = '价格不能小于 0'
   return errors
 }
@@ -94,6 +95,9 @@ export const createMaterial = (input: MaterialInput): Material => {
     materialType: input.materialType.trim().toUpperCase(),
     name: input.name.trim() || undefined,
     color: input.color.trim(),
+    colorCategory: input.colorCategory,
+    colorHex: input.colorHex?.trim() || undefined,
+    pantoneCode: input.pantoneCode?.trim() || undefined,
     initialWeightG: round2(input.initialWeightG),
     price: round2(input.price),
     status: 'MOUNTED',

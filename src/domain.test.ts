@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { defaultActualWeightG, finishPrint, remainingWeight, startPrint, unitCost } from './domain'
+import { createMaterial, defaultActualWeightG, finishPrint, remainingWeight, startPrint, unitCost, validateMaterial } from './domain'
 import type { AppData, Material } from './types'
 
 const material = (id: string, price = 100, status: Material['status'] = 'MOUNTED'): Material => ({
@@ -7,8 +7,24 @@ const material = (id: string, price = 100, status: Material['status'] = 'MOUNTED
   status, currentLocation: 'AMS A1', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
 })
 const emptyData = (materials: Material[] = [material('a')]): AppData => ({ materials, printJobs: [], usages: [] })
+const materialInput = (initialWeightG: number) => ({ brand: 'Bambu Lab', materialType: 'PLA', name: 'Basic', color: '黑色', initialWeightG, price: 99, currentLocation: 'AMS A1', note: '' })
 
 describe('filament usage domain', () => {
+  it('accepts valid net weights through 10000g and rejects zero or over-limit values', () => {
+    expect(validateMaterial(materialInput(1000))).not.toHaveProperty('initialWeightG')
+    expect(validateMaterial(materialInput(10000))).not.toHaveProperty('initialWeightG')
+    expect(validateMaterial(materialInput(0)).initialWeightG).toBe('重量必须大于 0')
+    expect(validateMaterial(materialInput(10000.1)).initialWeightG).toBe('初始耗材净重不能超过 10000g（10kg）')
+  })
+
+  it('persists optional color metadata when creating a material', () => {
+    const created = createMaterial({ ...materialInput(1000), colorCategory: 'METALLIC', colorHex: '#B8BCC2', pantoneCode: '' })
+    expect(created.color).toBe('黑色')
+    expect(created.colorCategory).toBe('METALLIC')
+    expect(created.colorHex).toBe('#B8BCC2')
+    expect(created.pantoneCode).toBeUndefined()
+  })
+
   it('provides finish defaults for each final status', () => {
     expect(defaultActualWeightG('COMPLETED', 82)).toBe(82)
     expect(defaultActualWeightG('CANCELLED', 82)).toBe(0)

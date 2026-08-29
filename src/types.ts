@@ -1,5 +1,6 @@
 export type MaterialStatus = 'MOUNTED' | 'STORED' | 'EMPTY' | 'DISABLED'
 export type PrintJobStatus = 'PRINTING' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+export type MaterialColorCategory = 'STANDARD' | 'METALLIC' | 'CUSTOM'
 
 export interface Material {
   id: string
@@ -7,6 +8,9 @@ export interface Material {
   materialType: string
   name?: string
   color: string
+  colorCategory?: MaterialColorCategory
+  colorHex?: string
+  pantoneCode?: string
   initialWeightG: number
   price: number
   status: MaterialStatus
@@ -47,6 +51,9 @@ export interface MaterialInput {
   materialType: string
   name: string
   color: string
+  colorCategory?: MaterialColorCategory
+  colorHex?: string
+  pantoneCode?: string
   initialWeightG: number
   price: number
   currentLocation: string
