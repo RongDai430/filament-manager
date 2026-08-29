@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, FormEvent, ReactNode } from 'react'
 import { materialApi, printApi } from './api'
 import { defaultActualWeightG, formatNumber, jobTotals, remainingPercent, remainingWeight, round2, unitCost, validateMaterial } from './domain'
+import { fetchMakerWorldRecommendations } from './makerworld'
 import { loadData, saveData } from './storage'
 import type { AppData, FinishInput, Material, MaterialColorCategory, MaterialInput, MaterialStatus, PrintJob, PrintJobStatus } from './types'
+import type { MakerWorldModel } from './makerworld'
 
 type Page = 'dashboard' | 'materials' | 'add-material' | 'start-print' | 'printing-detail' | 'finish-print' | 'history' | 'job-detail' | 'material-detail'
 type Toast = { message: string; type: 'success' | 'error' | 'info' }
@@ -183,8 +185,52 @@ function Dashboard({ data, navigate }: { data: AppData; navigate: (page: Page, i
       <MetricCard label="本月打印" value={data.printJobs.filter((job) => job.status !== 'PRINTING').length} suffix="项" icon="history" accent="green" meta="含完成、失败与取消" />
     </section>
     <section className="section-block mounted-section"><div className="section-heading"><div><div className="section-kicker">LIVE INVENTORY <span className="live-dot" /></div><h2>当前挂载耗材</h2></div><button className="text-button" onClick={() => navigate('materials')}>查看全部 <Icon name="arrow" size={15} /></button></div>{mounted.length ? <div className="mounted-grid">{mounted.map((material, index) => <MountedCard key={material.id} material={material} data={data} index={index} navigate={navigate} />)}</div> : <EmptyState title="还没有挂载耗材" action="录入新耗材" onAction={() => navigate('add-material')} compact />}</section>
+    <MakerWorldRecommendations />
     <section className="lower-grid"><div className="recent-panel panel"><div className="panel-heading"><div><div className="section-kicker">RECENT ACTIVITY</div><h2>最近打印</h2></div><button className="icon-button subtle" onClick={() => navigate('history')}><Icon name="external" size={17} /></button></div>{recentJobs.length ? <div className="job-list">{recentJobs.map((job) => <JobListItem key={job.id} job={job} data={data} onClick={() => navigate('job-detail', job.id)} />)}</div> : <div className="empty-inline">还没有打印记录</div>}</div><div className="attention-panel panel"><div className="panel-heading"><div><div className="section-kicker">ATTENTION</div><h2>需要留意</h2></div><span className="attention-count">{data.materials.filter((item) => item.status === 'MOUNTED' && remainingPercent(item, data.usages) < 20).length}</span></div><div className="attention-list">{data.materials.filter((item) => item.status === 'MOUNTED' && remainingPercent(item, data.usages) < 20).map((material) => <div className="attention-item" key={material.id}><span className="attention-icon"><Icon name="warning" size={17} /></span><div><strong>{material.brand} {material.name || material.materialType}</strong><span>剩余 {formatNumber(remainingWeight(material, data.usages))}g，建议准备下一卷</span></div><Icon name="chevron" size={16} /></div>)}{!data.materials.some((item) => item.status === 'MOUNTED' && remainingPercent(item, data.usages) < 20) && <div className="all-good"><span className="all-good-icon"><Icon name="check" size={17} /></span><div><strong>库存状态良好</strong><span>目前没有低库存耗材</span></div></div>}</div></div></section>
   </>
+}
+
+function MakerWorldRecommendations() {
+  const [models, setModels] = useState<MakerWorldModel[]>([])
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+
+  const loadBatch = async (signal?: AbortSignal) => {
+    setStatus('loading')
+    try {
+      const nextModels = await fetchMakerWorldRecommendations(signal)
+      if (signal?.aborted) return
+      setModels(nextModels)
+      setStatus(nextModels.length ? 'ready' : 'error')
+    } catch {
+      if (signal?.aborted) return
+      setModels([])
+      setStatus('error')
+    }
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void loadBatch(controller.signal)
+    return () => controller.abort()
+  }, [])
+
+  return <section className="makerworld-section panel">
+    <div className="panel-heading makerworld-heading">
+      <div><div className="section-kicker">MAKERWORLD / RANDOM PICK</div><h2>MakerWorld 随机推荐</h2><p className="makerworld-description">从当前公开网页随机挑选 4 个模型，点击后查看详情。</p></div>
+      <button type="button" className="text-button makerworld-refresh" onClick={() => void loadBatch()} disabled={status === 'loading'}>换一批 <Icon name="arrow" size={15} /></button>
+    </div>
+    {status === 'loading' && <div className="makerworld-state">正在获取 MakerWorld 推荐…</div>}
+    {status === 'error' && <div className="makerworld-state makerworld-state-error"><strong>暂时无法获取 MakerWorld 推荐</strong><span>请稍后点击“换一批”重试。</span></div>}
+    {status === 'ready' && <div className="makerworld-grid">{models.map((model) => <MakerWorldCard key={model.id} model={model} />)}</div>}
+  </section>
+}
+
+function MakerWorldCard({ model }: { model: MakerWorldModel }) {
+  return <a className="makerworld-card" href={model.url} target="_blank" rel="noopener noreferrer">
+    <div className="makerworld-cover"><img src={model.imageUrl} alt="" loading="lazy" /></div>
+    <div className="makerworld-card-copy"><strong title={model.name}>{model.name}</strong><span>作者 · {model.author}</span></div>
+    <Icon name="external" size={16} />
+  </a>
 }
 
 function MetricCard({ label, value, suffix, icon, accent, meta }: { label: string; value: number; suffix: string; icon: IconName; accent: string; meta: string }) {

@@ -151,6 +151,23 @@ h1 { color: var(--ink); letter-spacing: -.045em; font-size: clamp(28px, 3vw, 38p
 .card-actions .button-outline { padding: 0 10px; }
 .lower-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 13px; margin-top: 49px; }
 .panel { border: 1px solid var(--line); border-radius: 6px; background: var(--paper); box-shadow: var(--shadow); }
+.makerworld-section { margin-top: 49px; padding: 22px 24px 24px; }
+.makerworld-heading { align-items: flex-start; }
+.makerworld-description { margin-top: 8px; color: #929a95; font-size: 14px; }
+.makerworld-refresh { min-height: 40px; }
+.makerworld-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-top: 20px; }
+.makerworld-card { min-width: 0; position: relative; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5e2da; border-radius: 5px; background: #fffdfa; color: inherit; text-decoration: none; transition: .22s ease; }
+.makerworld-card:hover { transform: translateY(-2px); border-color: #d6d1c6; box-shadow: 0 11px 25px rgba(28,39,43,.08); }
+.makerworld-card:hover .makerworld-cover img { transform: scale(1.035); }
+.makerworld-cover { aspect-ratio: 4 / 3; overflow: hidden; background: #eeece6; }
+.makerworld-cover img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+.makerworld-card-copy { min-width: 0; padding: 13px 38px 15px 14px; }
+.makerworld-card-copy strong { display: block; overflow: hidden; color: #3f4c4f; font-size: 15px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.makerworld-card-copy span { display: block; overflow: hidden; margin-top: 7px; color: #9aa19b; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.makerworld-card > svg { position: absolute; right: 13px; bottom: 15px; color: #b0aaa0; }
+.makerworld-state { min-height: 130px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 7px; margin-top: 20px; border: 1px dashed #d9d6ce; border-radius: 5px; color: #8b9590; font-size: 15px; }
+.makerworld-state strong { color: #68746f; font-size: 16px; }
+.makerworld-state-error span { color: #a0a49e; }
 .recent-panel, .attention-panel { padding: 22px 24px; min-height: 282px; }
 .panel-heading { align-items: center; }
 .panel-heading h2 { margin-top: 8px; }
@@ -479,6 +496,7 @@ h1 { color: var(--ink); letter-spacing: -.045em; font-size: clamp(28px, 3vw, 38p
   .page-wrap { padding-left: 4vw; padding-right: 4vw; }
   .mounted-grid { grid-template-columns: repeat(2, 1fr); }
   .mounted-card:last-child { grid-column: 1 / -1; }
+  .makerworld-grid { grid-template-columns: repeat(2, 1fr); }
   .form-layout, .print-start-layout, .finish-layout, .detail-layout { grid-template-columns: minmax(0, 1fr) 245px; }
   .material-history-row { grid-template-columns: 98px minmax(0, 1fr) 75px 75px 90px 18px; gap: 9px; }
 }
@@ -518,6 +536,8 @@ h1 { color: var(--ink); letter-spacing: -.045em; font-size: clamp(28px, 3vw, 38p
   .section-heading h2, .panel-heading h2 { font-size: 18px; }
   .mounted-grid { grid-template-columns: 1fr; }
   .mounted-card:last-child { grid-column: auto; }
+  .makerworld-section { padding: 18px 16px 16px; }
+  .makerworld-grid { grid-template-columns: 1fr; }
   .lower-grid { margin-top: 35px; }
   .recent-panel, .attention-panel, .material-history-panel { padding: 18px 16px; }
   .materials-toolbar, .history-toolbar { align-items: flex-start; flex-direction: column; gap: 12px; padding: 13px; }
